@@ -2,6 +2,7 @@ const express = require('express') //express module을 가져온다.
 const app = express() //함수로 새로운 express 앱을 만든다.
 const port = 5000 //어떤 포트 번호를 백엔드 서버로 둘 것인가.
 const bodyParser = require('body-parser');
+const config  = require('./config/key');
 
 //application/x-www-form-urlencoded 이런 데이터를 분석해서 가져올 수 있게 한다.
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -13,7 +14,8 @@ app.use(bodyParser.json());
 const { User } = require('./models/User');
 
 const mongoose = require('mongoose')
-mongoose.connect('mongodb+srv://jskim0103:save0506rl@boiler-plate.iwegr.mongodb.net/?retryWrites=true&w=majority', {
+// mongoose.connect('mongodb+srv://jskim0103:save0506rl@boiler-plate.iwegr.mongodb.net/?retryWrites=true&w=majority', 
+mongoose.connect(config.mongoURI, {
     useNewUrlParser: true, useUnifiedTopology: true
 }).then(() => console.log('MongoDB Connected...'))
 .catch(err => console.log(err))
