@@ -94,6 +94,19 @@ app.get("/api/users/auth", auth ,(req, res) => { //auth 라는 middleware를 설
     })
 })
 
+//로그아웃 기능 생성
+app.get("/api/users/logout", auth, (req, res) => {
+  //로그아웃 하려는 정보를 model 에서 찾는다.
+  User.findOneAndUpdate({_id: req.user._id},//auth middleware에서 가져와서 찾는다.
+  { token: "" }, //token을 지워준다.
+  (err,user) => {
+    if(err) return res.json({success:false, err});
+    return res.status(200).send({
+      success:true
+    })
+  }) 
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
   //listen 하고 있으면, console을 출력한다.
