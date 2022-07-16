@@ -3,7 +3,6 @@ const app = express() //함수로 새로운 express 앱을 만든다.
 const port = 5000 //어떤 포트 번호를 백엔드 서버로 둘 것인가.
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-
 const config  = require('./config/key');
 
 //application/x-www-form-urlencoded 이런 데이터를 분석해서 가져올 수 있게 한다.
@@ -17,6 +16,7 @@ app.use(cookieParser());
 
 
 const { User } = require('./models/User');
+const { auth } = require('./middleware/auth');
 
 const mongoose = require('mongoose');
 const { application } = require('express');
@@ -33,11 +33,11 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.post('/register', (req, res) => { //라우트 제작 완료
+app.post('/api/users/register', (req, res) => { //라우트 제작 완료
   //회원가입 할 때 필요한 정보들을 client 에서 가져오면
   //그것들을 데이터 베이스에 넣어준다.
-  const user = new User(req.body)//instance 만들기
-  //save 전에 로그인을 암호화해야 한다.
+  const user = new User(req.body)//instance 만들기, request 에서 넘오는 정보를 가지고 User db 모델을 만든다.
+  //save 전에 비밀번호를 암호화해야 한다. -> User.js 로 가서 userschema.pre method 사용
   user.save((err, userInfo) => {
     if(err) return res.json({success: false, err})
     return res.status(200).json({
@@ -47,7 +47,7 @@ app.post('/register', (req, res) => { //라우트 제작 완료
 })
 
 
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
   //요청된 이메일을 데이터베이스에서 있는지 찾기
   User.findOne({email: req.body.email}, (err, user) => {
     if(!user){
@@ -74,6 +74,24 @@ app.post('/login', (req, res) => {
       })
     })
   })
+})
+
+//맞는지 확인을 해봐야 할듯?
+//auth는 로그인 만큼 복잡하다.
+//middleware에서 오류가 있다고 하면, error 를 발생해서 탈출하게 된다. -> 여기까지 오지 못한다.
+app.get("/api/users/auth", auth ,(req, res) => { //auth 라는 middleware를 설치한다.
+    //여기까지 미들웨어를 통과해 왔다는 이야기는 authentication이 True라는 이야기이다.
+    res.status(200).json({
+      _id: req.user._id,
+      isAdmin: req.user.role == 0 ? false : true, //0이면 false 아니면 true -> false 일때 관리자가 아니다.
+      //지금 상황은 role이 0이면 일반 유져이고 나머지이면, 관리자이다.
+      isAuth:true,
+      email: req.user.email,
+      name : req.user.name,
+      lastname: req.user.lastname,
+      role : req.user.role,
+      image: req.user.image
+    })
 })
 
 app.listen(port, () => {
