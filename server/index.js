@@ -3,7 +3,7 @@ const app = express() //함수로 새로운 express 앱을 만든다.
 const port = 5000 //어떤 포트 번호를 백엔드 서버로 둘 것인가.
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const config  = require('./config/key');
+const config  = require('../boiler-plate/server/config/key');
 
 //application/x-www-form-urlencoded 이런 데이터를 분석해서 가져올 수 있게 한다.
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 
-const { User } = require('./models/User');
+const { User } = require('../boiler-plate/server/models/User');
 const { auth } = require('./middleware/auth');
 
 const mongoose = require('mongoose');
